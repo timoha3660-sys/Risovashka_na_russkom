@@ -126,27 +126,6 @@ def START(event=None):
     butcol = tk.Button(window, text="Изменить цвет")
     butcol.config(command=pickC)
     butcol.pack()
-    def an4(event=None):
-        butcol.config(bg="blue")
-        window.after(500, lambda:[butcol.config(fg="black", bg="SystemButtonFace")])
-    def an3(event=None):
-        butcol.config(bg="red")
-        window.after(500, an4)
-    def an2(event=None):
-        butcol.config(bg="blue")
-        window.after(500, an3)
-    def an1(event=None):
-        butcol.config(bg="red", fg="white")
-        window.after(500, an2)
-    def State(event=None):
-        global state
-        if state == 0:
-            if HEX != None:
-                state = 1
-            else:
-                an1()
-        elif state == 1:
-            state = 0
     label = tk.Label(window, text="Tолщина(в пикселях)")
     label.place(x=20, y=465)
     o_all.append(label)
@@ -157,10 +136,10 @@ def START(event=None):
     get_Coord()
     oval = long.create_oval(50, 50, 50, 50, fill=None, outline=HEX)
     oval2 = canvas.create_oval(xc - (scale.get() / 2), yc - (scale.get() / 2), xc + (scale.get() / 2), yc + (scale.get() / 2), fill=HEX, outline=HEX)
-    def start():
-        global oval, oval2, HEX, HEX_C, clears, c_state,  s_state, xc, yc
+    def draw(event=None):
+        global HEX, clears, c_state, s_state, xc, yc
         get_Coord()
-        if state == 1 and HEX != None:
+        if HEX != None:
             if open_btn.cget("text")[0] != "*" and open_btn.cget("text") != "Открыть фото":
                 open_btn.config(text="*"+open_btn.cget("text"))
             if s_state == 0:
@@ -173,26 +152,27 @@ def START(event=None):
                     clears.append(canvas.create_rectangle(xc - (scale.get() / 2), yc - (scale.get() / 2), xc + (scale.get() / 2), yc + (scale.get() / 2), fill=HEX, outline=HEX))
                 else:
                     canvas.create_rectangle(xc - (scale.get() / 2), yc - (scale.get() / 2), xc + (scale.get() / 2), yc + (scale.get() / 2), fill=HEX, outline=HEX)
+    def start():
+        global oval, oval2, HEX, HEX_C
         butcol.config(bg=HEX)
         btn_c.config(bg=HEX_C)
         long.delete(oval)
         canvas.delete(oval2)
+        get_Coord()
         if HEX:
             if s_state == 0:
+                oval2 = canvas.create_oval(xc + 2 - (scale.get() / 2), yc + 2 - (scale.get() / 2), xc - 2 +(scale.get() / 2), yc - 2 + (scale.get() / 2), fill=None, outline=HEX, width=2)
                 oval = long.create_oval(50 - scale.get()/2, 50 - scale.get()/2, 50 + scale.get()/2, 50 + scale.get()/2, fill=HEX, outline=HEX)
             if s_state == 1:
+                oval2 = canvas.create_rectangle(xc + 2 - (scale.get() / 2), yc + 2 - (scale.get() / 2), xc - 2 + (scale.get() / 2), yc - 2 + (scale.get() / 2), fill=None, outline=HEX, width=2)
                 oval = long.create_rectangle(50 - scale.get()/2, 50 - scale.get()/2, 50 + scale.get()/2, 50 + scale.get()/2, fill=HEX, outline=HEX)
         elif HEX and (not HEX == "#ffffff"):
             if s_state == 0:
                 oval = long.create_oval(50 - scale.get()/2, 50 - scale.get()/2, 50 + scale.get()/2, 50 + scale.get()/2, fill=HEX, outline=HEX)
             if s_state == 1:
                 oval = long.create_rectangle(50 - scale.get()/2, 50 - scale.get()/2, 50 + scale.get()/2, 50 + scale.get()/2, fill=HEX, outline=HEX)
-        if state == 0 and HEX != None:
-            if s_state == 0:
-                oval2 = canvas.create_oval(xc - (scale.get() / 2), yc - (scale.get() / 2), xc + (scale.get() / 2), yc + (scale.get() / 2), fill=None, outline=HEX, width=2)
-            elif s_state == 1:
-                oval2 = canvas.create_rectangle(xc - (scale.get() / 2), yc - (scale.get() / 2), xc + (scale.get() / 2), yc + (scale.get() / 2), fill=None, outline=HEX, width=2)
         window.after(1, start)
+    start()
     def plus(event=None):
         current = scale.get() + 1
         if current < 101:
@@ -377,7 +357,7 @@ def START(event=None):
         c.config(command=lambda:[stay_or_close_w.destroy(), window.destroy()])
         n.config(command=lambda:stay_or_close_w.destroy())
         s.config(command=save)
-    canvas.bind("<Button-1>", State)
+    canvas.bind("<B1-Motion>", draw)
     window.bind("<Delete>", Clear_c)
     window.bind("<F1>", pickC)
     window.bind("<F2>", Clear)
@@ -392,9 +372,8 @@ def START(event=None):
     window.bind("<F11>", open_img)
     window.bind("<F12>", pickP)
     window.protocol("WM_DELETE_WINDOW", stay_or_close)
-    start()
     window.mainloop()
-label = tk.Label(w_info, text='1.)Чтобы рисовать, нажмите на холст.\n2.)Чтобы перестать рисовать, нажмите второй раз\n3.)Чтобы изменить цвет нажмите на кнопку: "Изменить цвет"\n4.)В правом нижнем углу экрана вы видите обозначение вашей кисти\n5.)Чтобы не рисовать фон вручную нажмите кнопку "Цвет фона"\n6.)Чтобы изменить тему нажмите на кнопу "Тёмная тема/Светлая тема"\nDelete - отчистить\nF1 - выбрать цвет\nF2 - стёрка\nF3 - -толщина\nF4 - +толщина\nF5 - изменить тему\nF6 - выбрать цвет фона\nF7 - хватит\nF8 - справка\nF9 - изменить форму\nF10 - сохранить рисунок\nF11 - открыть фото\nF12 - выбрать раскраску', font=("Arial", 20))
+label = tk.Label(w_info, text='1.)Чтобы изменить цвет нажмите на кнопку: "Изменить цвет"\n2.)В правом нижнем углу экрана вы видите обозначение вашей кисти\n3.)Чтобы не рисовать фон вручную нажмите кнопку "Цвет фона"\n4.)Чтобы изменить тему нажмите на кнопу "Тёмная тема/Светлая тема"\nDelete - отчистить\nF1 - выбрать цвет\nF2 - стёрка\nF3 - -толщина\nF4 - +толщина\nF5 - изменить тему\nF6 - выбрать цвет фона\nF7 - хватит\nF8 - справка\nF9 - изменить форму\nF10 - сохранить рисунок\nF11 - открыть фото\nF12 - выбрать раскраску', font=("Arial", 20))
 label.pack()
 inf_btn = tk.Button(w_info, text="Понятно")
 inf_btn.config(command=START)
